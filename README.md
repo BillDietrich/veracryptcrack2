@@ -62,7 +62,7 @@ sudo ./veracrypt_crack.sh
 
 ## Misc
 
-Relevent: https://github.com/NorthernSec/VeraCracker
+Relevant: https://github.com/NorthernSec/VeraCracker
 
 
 ## Privacy Policy
