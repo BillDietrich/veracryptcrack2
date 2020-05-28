@@ -45,13 +45,15 @@ veracrypt --text --version
 sudo ./veracrypt_crack.sh
 # Only way to stop it running is to close the terminal !
 
-# On my slow laptop, with 5-second timeout, it ran for 52 minutes and failed to open the test container.
-# Wordlist has 208 passwords in it, multiplied by 3 PIM values for each password.
+# On my slow laptop, with 5-second timeout, it ran for 52 minutes
+# and failed to open the test container.  Wordlist has 208 passwords
+# in it, multiplied by 3 PIM values for each password.
 
 # Launched VeraCrypt GUI app and left it open.
 # Changed timeout to 10 seconds and tried again.
 # Worked in 3 minutes.
-# Correct password/PIM are not the ones just above the "Error: already mounted" message, but the next ones above that.
+# Correct password/PIM are not the ones just above the
+# "Error: already mounted" message, but the next ones above that.
 
 # Left VeraCrypt GUI app open.
 # Changed timeout back to 5 seconds and tried again.
