@@ -54,11 +54,38 @@ sudo ./veracrypt_crack.sh
 # Worked in 3 minutes.
 # Correct password/PIM are not the ones just above the
 # "Error: already mounted" message, but the next ones above that.
+# Spoiler: PIM is "1337", password is "crackmeifyoucan".
+# And once mounted, can see hash is "HMAC-SHA-512 (Dynamic)"
+# and encryption is "AES-Twofish-Serpent".
 
 # Left VeraCrypt GUI app open.
 # Changed timeout back to 5 seconds and tried again.
 # Again it ran for 52 minutes and failed.
 ```
+
+### Improvements
+
+* Check return code from VeraCrypt, stop when succeed.
+* Made output clearer.
+
+
+#### Notes
+
+veracrypt --text --help
+veracrypt --text test.container /media/veracrypt7
+returns 0 if successfully mounts, 1 if already mounted, 124 if password wrong
+
+hashcat --help | grep -i "FDE" | grep -e X -e Y
+hashcat --quiet --force --status --hash-type=13722 --veracrypt-pim=1337 --attack-mode=0 --workload-profile=2 test.container wordlist.txt
+hashcat --hash-type=13722 --veracrypt-pim=1337 --show -o "pass.txt" test.container
+
+test1.container: Serpent SHA512  123456789
+hashcat --quiet --force --status --hash-type=13721 --attack-mode=0 --workload-profile=2 test1.container wordlist.txt
+hashcat --hash-type=13721 --show -o "pass.txt" test1.container
+
+https://gist.github.com/GabMus/4b6f7167730a4a274cdee19696783e72
+https://pastebin.com/R8stQCCy
+
 
 ## Misc
 
