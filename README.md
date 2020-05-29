@@ -1,88 +1,76 @@
-# veracryptcrack
+# veracryptcrack2
 
-Simple veracrypt container cracker using wordlist
+VeraCrypt container cracker using hashcat and wordlist/dictionary.  Linux-only.
 
-All configuration is done from veracrypt_crack.sh
+You DO need to know the encryption algorithm settings of the VeraCrypt volume to decrypt it.
 
-Install 'timeout' package before running
+May be useful if you forget PIM, which keyfile you used, or mixed up a few characters in a password.
 
-When password is cracked - container will be mounted
+When done, use 'wipe' or 'srm' to securely overwrite your wordlist.
 
-Give your user permissions to mount or run as root
+Good luck recovering.
 
-To check everything works correctly before spending more time, run script against veracrypt test.container, it shouldn't take more than 1 minute
-
-Often useful when you forget PIM, which keyfile you used, or mixed up a few characters in a password
-
-When done, use 'wipe' or 'srm' to securely overwrite your wordlist
-
-Good luck recovering
-
-
-## Notes by Bill Dietrich
-
-### Source
-
-Originally from https://github.com/RhZjQyMWI/veracryptcrack
-
-Found it from https://pay.reddit.com/r/VeraCrypt/comments/fatkq2/forgot_my_password_earlier_today_so_wrote/ by /u/IndependentHorror5 :
-
-> Managed to get back into the container within ~45 minutes of automated cracking which was preceded with ~2 hours of manual trying.
->
-> This was not a pure bruteforce, but rather speeding up based on some possibly known parameters about the container which was not opened for a while.
->
-> Knew there was a PIM but did not know which one and a long password which I couldn't remember clearly. So i've added 20-25 possible PIM combinations to PIM list, numbers that have some meaning to me and generated a wordlist from multiple combinations of passwords I could have used for that container. wordlist.txt had around 500 or more combinations. Came back from lunch and saw a warning that the volume can't be mounted, because it's already mounted. :)
 
 ### Run via:
 
 ```shell
-chmod a+x veracrypt_crack.sh
+# This takes around 500 MB of disk space !
+sudo apt install hashcat
 
-# Make sure you have software installed:
-timeout --version
-veracrypt --text --version
+chmod u+x veracrypt_crack2.sh
 
-sudo ./veracrypt_crack.sh
+# Make sure you have necessary software installed:
+hashcat --version
 
-# On my slow laptop, with 5-second timeout, it ran for 52 minutes
-# and failed to open the test container.  Wordlist has 208 passwords
-# in it, multiplied by 3 PIM values for each password.
+# To check that everything works correctly before spending more time,
+# run script as given.  It will run against test2.container.
+# It shouldn't take more than a minute or two (because the fourth
+# line in the wordlist is the correct password).
+./veracrypt_crack2.sh
+# You should see a "Cracked" message and "test2.container:THECRACKEDPASSWORD"
 
-# Changed timeout to 10 seconds and tried again.
-# Worked in 3 minutes.
-# Spoiler: test.container PIM is "1337", password is "crackmeifyoucan".
-# And once mounted, can see hash is "HMAC-SHA-512 (Dynamic)"
-# and encryption is "AES-Twofish-Serpent".
+# Then, edit veracrypt_crack2.sh to specify the container you need
+# to crack.  The main thing to know is what hash and encryption algorithms
+# were specified when creating the container; see comments in veracrypt_crack2.sh
+# You also can edit wordlist.txt or specify a different wordlist file.
 ```
 
-### Improvements
-
-* Check return code from VeraCrypt, stop when succeed.
-* Made output clearer.
-* Changed from bash to sh so ctrl+C works.
 
 
 #### Notes
 
-veracrypt --text --help
-veracrypt --text test.container /media/veracrypt7
-returns 0 if successfully mounts, 1 if already mounted, 124 if password wrong
+Inspired by https://github.com/BillDietrich/veracryptcrack and 
+https://github.com/BillDietrich/keepasscrack
 
+```shell
+# see all TrueCrypt/VeraCrypt configuration values
 hashcat --help | grep -i "FDE" | grep -e X -e Y
-hashcat --quiet --force --status --hash-type=13722 --veracrypt-pim=1337 --attack-mode=0 --workload-profile=2 test.container wordlist.txt
-hashcat --hash-type=13722 --veracrypt-pim=1337 --show -o "pass.txt" test.container
 
-test1.container: Serpent SHA512  123456789
-hashcat --quiet --force --status --hash-type=13721 --attack-mode=0 --workload-profile=2 test1.container wordlist.txt
-hashcat --hash-type=13721 --show -o "pass.txt" test1.container
+# test.container: SHA512   AES-Twofish-Serpent   password crackmeifyoucan   PIM 1337
+hashcat --force --status --hash-type=13722 --veracrypt-pim=1337 --attack-mode=0 --workload-profile=2 test.container wordlist.txt
+# fails: I think "AES-Twofish-Serpent" is not supported by hashcat
 
-https://gist.github.com/GabMus/4b6f7167730a4a274cdee19696783e72
-https://pastebin.com/R8stQCCy
+# test1.container:  hash SHA-256   encryption Camellia 256    password 123456789   no PIM no keyfile
+# use hash-type 13751
+hashcat --force --status --hash-type=13731 --attack-mode=0 --workload-profile=2 test1.container wordlist.txt
+# see:		test1.container:123456789                        
+#			Session..........: hashcat                       
+#			Status...........: Cracked
+
+# These are VeraCrypt 1.24 default settings when you create a container:
+# test2.container:  hash SHA-512   encryption AES    password 123456789   no PIM no keyfile
+# use hash-type 13721
+hashcat --force --status --hash-type=13721 --attack-mode=0 --workload-profile=2 test2.container wordlist.txt
+# see:		test2.container:123456789                        
+#			Session..........: hashcat                       
+#			Status...........: Cracked
 
 
-## Misc
+# https://gist.github.com/GabMus/4b6f7167730a4a274cdee19696783e72
+# https://pastebin.com/R8stQCCy
+# https://web.archive.org/web/20161026005447/0x31.de/cracking-truecrypt-container-non-system-system/
+```
 
-Relevant: https://github.com/NorthernSec/VeraCracker
 
 
 ## Privacy Policy
